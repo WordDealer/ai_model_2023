@@ -1,16 +1,20 @@
-## 论文背景
-本工程参考以下四篇论文实现。 
-> Neural Speech Synthesis with Transformer Network  
-FastSpeech: Fast, Robust and Controllable Text to Speech  
-FastSpeech 2: Fast and High-Quality End-to-End Text to Speech  
-FastPitch: Parallel Text-to-speech with Pitch Prediction  
+# 实验手册
+## 实验目的
+1. 熟悉基于transformer的TTS架构
+2. 掌握transformTTS模型的安装使用方法
+3. 自制数据集，利用transformerTTS模型生成高质量音频文件，探索transform模型的实际应用技巧。
+## 实验要求
+1. 部署transformerTTS模型环境
+2. 使用transformTTS模型生成音频文件
+3. 自制英文数据集，生成个性化音频文件。
+## 实验原理
+ 
+本模型在解决传统TTS方法的低效率和难以建模长程依赖的问题上都有创新点。通过Transform网络的思想来改进传统的TTS方法，以提高效率和语音质量；并且尝试解决低效率训练和推理、难以建模长程依赖的问题，在实验中展示了令人满意的结果。  
 
-这四篇论文都是关于文本转化语音（TTS）的研究工作，它们在解决传统TTS方法的低效率和难以建模长程依赖的问题上都有创新点。他们都通过Transform网络的思想来改进传统的TTS方法，以提高效率和语音质量；并且尝试解决低效率训练和推理、难以建模长程依赖的问题，在实验中展示了令人满意的结果。  
-当然，这些论文的细节并不相同，它们通过使用不同的技术手段（如多头自注意力、教师模型辅助、预测音高轮廓等）来实现并行生成mel-spectrogram或直接生成语音波形，从而加速合成过程并提高语音质量。  
-## 模型实现原理
-### 创新型
+
 在transformer之前，深度学习用于实现TTS已经取得很高的性能，代表作如Tacotron2模型。而本模型在此模型上加以改进，通过使用transformer来提高训练效率。  
 可以说，transformer-TTS是将Transformer和Tacotron2融合，通过transformer来处理序列化数据而不是通过深度学习传统的CNN或者RNN.
+
 ### 模型框架
 模型的主体还是经典transformer，但是由于实现的是语音生成任务而非文本生成任务，在输入输出阶段稍有不同。
 - 在输入阶段提前将文字序列转化为音素序列，以下图为例，通过Text-to-phone Convertor将英文文本转化成音素序列，所谓音素，是语音的最小可分辨单位，是构成语音的基本声音单元。
@@ -35,6 +39,37 @@ FastPitch: Parallel Text-to-speech with Pitch Prediction
 
 ![image](https://github.com/WordDealer/Transformer_Model/assets/56788639/8d112b46-7ccb-4d71-924d-5527a2ac1f06)
 
+## 环境部署
+### 1. python 3.6环境
+首先安装python环境
+```
+conda create -n TTS36 python==3.6
+conda activate TTS36  
+```
+### 2. github仓库
+下载项目
+```
+git clone thub.com/as-ideas/TransformerTTS.git
+cd TransformerTTS
+```
+### 3. pip软件包
+安装软件包
+```
+pip install -r requirements.txt
+```
+```
+pip install pyparsing==2.4.7
+```
+### 4.下载模型
+
+[模型链接](https://public-asai-dl-models.s3.eu-central-1.amazonaws.com/TransformerTTS/api_weights/bdf06b9_ljspeech/bdf06b9_ljspeech_step_90000.zip)
+在以上链接下载模型到TransformerTTS/model/model文件夹，没有对应文件夹就新建文件夹。
+
+下载完模型解压到同一路径
+## transformerTTS运行
+```
+(TTS36) user@ubuntu:~/model/model3/TransformerTTS$ python predict_tts.py -t "Please, say something."
+```
 ### 模型解释
 - 模型输入：一段英文文本
 - 模型输出：wav文件在outputs/custom_text文件夹，是输入的英文文本的语音生成文件。如下图。注意：如果想要批量生成输出文件，需要对输出的文件名修改，否则由于输出文件都是相同名字，新文件会替代旧文件。
@@ -42,48 +77,53 @@ FastPitch: Parallel Text-to-speech with Pitch Prediction
 ![image](https://github.com/WordDealer/Transformer_Model/assets/56788639/94635aad-aedd-472d-940e-e794b93bc731)
 
 ## 模型安装使用
-### 1. python 3.6环境
 ```
-conda create -n TTS36 python==3.6
-conda activate TTS36  
-```
-### 2. github仓库
-```
-git clone thub.com/as-ideas/TransformerTTS.git
-```
-### 3. pip软件包
-```
-cd TransformerTTS
-pip install -r requirements.txt
-```
-此时运行得到错误信息
-```
-(TTS36) user@ubuntu:~/model/model3/TransformerTTS$ python predict_tts.py -t "Please, say something."
-2023-06-22 23:18:30.259622: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2023-06-22 23:18:30.259658: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
-Traceback (most recent call last):
-  File "predict_tts.py", line 7, in <module>
-    from data.audio import Audio
-  File "/home/user/model/model3/TransformerTTS/data/audio.py", line 6, in <module>
-    import librosa.display
-  File "/home/user/anaconda3/envs/TTS36/lib/python3.6/site-packages/librosa/display.py", line 23, in <module>
-    from matplotlib.cm import get_cmap
-  File "/home/user/anaconda3/envs/TTS36/lib/python3.6/site-packages/matplotlib/__init__.py", line 139, in <module>
-    from . import cbook, rcsetup
-  File "/home/user/anaconda3/envs/TTS36/lib/python3.6/site-packages/matplotlib/rcsetup.py", line 27, in <module>
-    from matplotlib.fontconfig_pattern import parse_fontconfig_pattern
-  File "/home/user/anaconda3/envs/TTS36/lib/python3.6/site-packages/matplotlib/fontconfig_pattern.py", line 18, in <module>
-    from pyparsing import (Literal, ZeroOrMore, Optional, Regex, StringEnd,
-  File "/home/user/anaconda3/envs/TTS36/lib/python3.6/site-packages/pyparsing/__init__.py", line 130, in <module>
-    __version__ = __version_info__.__version__
-AttributeError: 'version_info' object has no attribute '__version__'
+(TTS36) user@ubuntu:~/model/model3/TransformerTTS$ python predict_tts.py -t "Please, say something." -p /home/user/model/model3/TransformerTTS/model/mobel/bdf06b9_ljspeech_step_90000/bdf06b9_ljspeech_step_90000
+2023-06-23 03:48:08.648046: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2023-06-23 03:48:08.648086: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+Loading model from /home/user/model/model3/TransformerTTS/model/mobel/bdf06b9_ljspeech_step_90000/bdf06b9_ljspeech_step_90000
+2023-06-23 03:48:18.661162: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
+2023-06-23 03:48:18.661202: W tensorflow/stream_executor/cuda/cuda_driver.cc:269] failed call to cuInit: UNKNOWN ERROR (303)
+2023-06-23 03:48:18.661224: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (ubuntu): /proc/driver/nvidia/version does not exist
+2023-06-23 03:48:18.687299: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: git_hash mismatch: bdf06b9(config) vs 3638055(local).
+Output wav under outputs/custom_text
 
 ```
-更改包版本
+此时输出的wav文件在outputs/custom_text文件夹里，我们输入的英文文本是"Please, say something."，把这句话替换成任意英文文本，来生成对应的音频文件吧。
+#### 生成的音频文件如下
+![](./picture/8.jpg)
+把文件拖拽到windows操作系统即可用媒体播放器播放，看看发音是否正确自然呢。
+### 数据集获取
+由于本模型所使用的输入仅为一句英文文本，所以，只需要一句英文文本来替代上文的"Please, say something."即可通过命令行调用此模型来生成任意语句的语音。无需专门制作数据集，可以使用spilt函数将英文文本划分成一个个的短句来分别生成这些句子的语音文件。
+如下所示：
 ```
-pip install pyparsing==2.4.7
+def split_sentences(text):
+    # 将文章按句号划分成句子列表
+    sentences = text.split('. ')
+    # 在最后一个句子后添加句号
+    if len(sentences) > 1 and not sentences[-1].endswith('.'):
+        sentences[-1] += '.'
+    return sentences
+# 示例英文文章
+article = "This is the first sentence. This is the second sentence. This is the third sentence."
+# 调用函数将文章划分为句子列表
+sentences = split_sentences(article)
+## 此时的sentence已经是按照句子划分的列表了，可以对每一句话调用一次模型。模型也可以通过python代码来调用（见原github仓库），或者在代码里集成上述命令行代码来调用。
 ```
-记录一下此时的版本
+
+## 参考文章 && 引用项目
+### 参考文章
+Neural Speech Synthesis with Transformer Network  
+FastSpeech: Fast, Robust and Controllable Text to Speech  
+FastSpeech 2: Fast and High-Quality End-to-End Text to Speech  
+FastPitch: Parallel Text-to-speech with Pitch Prediction  
+基于Transformer的语音合成系统
+### 引用项目
+https://github.com/as-ideas/TransformerTTS
+## 附录
+### python包
 ```
 (TTS36) user@ubuntu:~/model/model3/TransformerTTS$ pip list
 Package                 Version
@@ -174,52 +214,9 @@ wheel                   0.37.1
 wrapt                   1.12.1
 zipp                    3.6.0
 ```
-### 4. 预处理模型
-#### 下载地址
-https://public-asai-dl-models.s3.eu-central-1.amazonaws.com/TransformerTTS/api_weights/bdf06b9_ljspeech/bdf06b9_ljspeech_step_90000.zip
-#### 解压
-#### 运行
-```
-(TTS36) user@ubuntu:~/model/model3/TransformerTTS$ python predict_tts.py -t "Please, say something." -p /home/user/model/model3/TransformerTTS/model/mobel/bdf06b9_ljspeech_step_90000/bdf06b9_ljspeech_step_90000
-2023-06-23 03:48:08.648046: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
-2023-06-23 03:48:08.648086: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
-Loading model from /home/user/model/model3/TransformerTTS/model/mobel/bdf06b9_ljspeech_step_90000/bdf06b9_ljspeech_step_90000
-2023-06-23 03:48:18.661162: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libcuda.so.1'; dlerror: libcuda.so.1: cannot open shared object file: No such file or directory
-2023-06-23 03:48:18.661202: W tensorflow/stream_executor/cuda/cuda_driver.cc:269] failed call to cuInit: UNKNOWN ERROR (303)
-2023-06-23 03:48:18.661224: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:156] kernel driver does not appear to be running on this host (ubuntu): /proc/driver/nvidia/version does not exist
-2023-06-23 03:48:18.687299: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
-To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
-WARNING: git_hash mismatch: bdf06b9(config) vs 3638055(local).
-Output wav under outputs/custom_text
 
-```
-## 数据集获取
-由于本模型所使用的输入仅为一句英文文本，所以，只需要一句英文文本来替代上文的"Please, say something."即可通过命令行调用此模型来生成任意语句的语音。无需专门制作数据集，可以使用spilt函数将英文文本划分成一个个的短句来分别生成这些句子的语音文件。
-如下所示：
-```
-def split_sentences(text):
-    # 将文章按句号划分成句子列表
-    sentences = text.split('. ')
-    # 在最后一个句子后添加句号
-    if len(sentences) > 1 and not sentences[-1].endswith('.'):
-        sentences[-1] += '.'
-    return sentences
-# 示例英文文章
-article = "This is the first sentence. This is the second sentence. This is the third sentence."
-# 调用函数将文章划分为句子列表
-sentences = split_sentences(article)
-## 此时的sentence已经是按照句子划分的列表了，可以对每一句话调用一次模型。模型也可以通过python代码来调用（见原github仓库），或者在代码里集成上述命令行代码来调用。
-```
-## 参考文章 && 引用项目
-### 参考文章
-Neural Speech Synthesis with Transformer Network  
-FastSpeech: Fast, Robust and Controllable Text to Speech  
-FastSpeech 2: Fast and High-Quality End-to-End Text to Speech  
-FastPitch: Parallel Text-to-speech with Pitch Prediction  
-基于Transformer的语音合成系统
-### 引用项目
-https://github.com/as-ideas/TransformerTTS
 
-## 备注
+
+### 备注
 1. https://github.com/as-ideas/TransformerTTS是模型原仓库，包含更多使用方法。
 2. 下载失败的可能原因是由于github，网络等各方面原因。无法下载某些资源时可以使用国内源、谷歌、多次尝试或者拷贝已有文件到相应位置等等。
